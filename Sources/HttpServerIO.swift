@@ -15,7 +15,8 @@ public protocol HttpServerIODelegate: class {
 public class HttpServerIO {
 
     public weak var delegate : HttpServerIODelegate?
-
+    public var didFinishStartSetup: (() -> Void)?
+    
     private var socket = Socket(socketFileDescriptor: -1)
     private var sockets = Set<Socket>()
 
@@ -79,6 +80,7 @@ public class HttpServerIO {
         DispatchQueue.global(qos: priority).async { [weak self] in
             guard let strongSelf = self else { return }
             guard strongSelf.operating else { return }
+            strongSelf.didFinishStartSetup?()
             while let socket = try? strongSelf.socket.acceptClientSocket() {
                 DispatchQueue.global(qos: priority).async { [weak self] in
                     guard let strongSelf = self else { return }
